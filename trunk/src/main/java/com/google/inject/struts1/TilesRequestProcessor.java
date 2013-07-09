@@ -26,36 +26,32 @@ public class TilesRequestProcessor extends
 	protected Action processActionCreate(HttpServletRequest request,
 			HttpServletResponse response, ActionMapping mapping)
 			throws IOException {
-
+		
 		String className = mapping.getType();
 		Action action = null;
-
+		
 		synchronized (actions) {
 			boolean isNewInstance = (actions.get(className) == null);
 			if (isNewInstance) {
-				// Step 1: create an instance of the action by the normal
-				// (struts1) way
-				Action instance = super.processActionCreate(request, response,
-						mapping);
+				// Step 1: create an instance of the action by the normal way
+				Action strutsCreatedAction = super.processActionCreate(request,
+						response, mapping);
 
-				// Step 2: create an instance of the action by the Guice
+				// Step 2: create an instance of the action from Guice
 				Action guiceCreatedAction = GuiceHelper.getInjector()
-						.getInstance(instance.getClass());
+						.getInstance(strutsCreatedAction.getClass());
 
-				// Step 3: copy servlet object from the instance of action
-				// created by the normal (struts1) way to the action created by
-				// Guice
-				guiceCreatedAction.setServlet(instance.getServlet());
+				// Step 3: copy the servlet object from strutsCreatedAction to
+				// guiceCreatedAction
+				guiceCreatedAction.setServlet(strutsCreatedAction.getServlet());
 
-				// Step 4: replace struts1 action in the actions map with action
-				// created by Guice
+				// Step 4: replace strutsCreatedAction in the actions map with
+				// guiceCreatedAction
 				actions.put(className, guiceCreatedAction);
 			}
 			// instance = <from map>
 			action = (Action) actions.get(className);
-			System.out.println(action.toString());
 		}
 		return action;
 	}
-
 }

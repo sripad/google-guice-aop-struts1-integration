@@ -3,6 +3,10 @@ package com.google.inject.struts1;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.struts1.example.aop.ComputeExecutionTime;
+import com.google.inject.struts1.example.aop.ComputeExecutionTimeMethodInterceptor;
+import com.google.inject.util.Modules;
 
 /**
  * @author sripad
@@ -27,18 +31,7 @@ public class GuiceHelper {
 	 * Container (Guice).
 	 */
 	public static <T> T getInjectedInstance(Class<T> classToInstantiate) {
-		if (injector == null) {
-			createInjector();
-		}
-		return injector.getInstance(classToInstantiate);
-	}
-
-	private static void createInjector() {
-		injector = Guice.createInjector(new AbstractModule() {
-			protected void configure() {
-				//
-			}
-		});
+		return getInjector().getInstance(classToInstantiate);
 	}
 
 	/**
@@ -49,9 +42,29 @@ public class GuiceHelper {
 	 * @Inject.
 	 */
 	public static void inject(Object instanceToPopulate) {
-		if (injector == null) {
-			createInjector();
-		}
-		injector.injectMembers(instanceToPopulate);
+		getInjector().injectMembers(instanceToPopulate);
+	}
+
+	private static void createInjector() {
+		AopModule aopModule = new AopModule();
+		injector = Guice.createInjector(Modules.EMPTY_MODULE, aopModule);
+		aopModule.injectInterceptors(injector);
+	}
+}
+
+class AopModule extends AbstractModule {
+	ComputeExecutionTimeMethodInterceptor computeExecutionTimeMethodInterceptor;
+
+	@Override
+	protected void configure() {
+		computeExecutionTimeMethodInterceptor = new ComputeExecutionTimeMethodInterceptor();
+		requestInjection(computeExecutionTimeMethodInterceptor);
+		bindInterceptor(Matchers.any(),
+				Matchers.annotatedWith(ComputeExecutionTime.class),
+				computeExecutionTimeMethodInterceptor);
+	}
+
+	public void injectInterceptors(Injector injector) {
+		injector.injectMembers(computeExecutionTimeMethodInterceptor);
 	}
 }
