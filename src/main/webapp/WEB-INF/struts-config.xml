@@ -6,14 +6,20 @@
 <struts-config>
 	<form-beans>
 		<form-bean name="helloWorldForm"
-			type="com.google.inject.struts1.example.HelloWorldForm" />
+			type="com.google.inject.struts1.example.simpleinjection.HelloWorldForm" />
+		<form-bean name="someForm"
+			type="com.google.inject.struts1.example.aop.SomeForm" />
 	</form-beans>
 
 	<action-mappings>
 		<action path="/helloWorld"
-			type="com.google.inject.struts1.example.HelloWorldAction" name="helloWorldForm">
+			type="com.google.inject.struts1.example.simpleinjection.HelloWorldAction"
+			name="helloWorldForm">
 			<forward name="success" path="/helloWorld.jsp" />
-
+		</action>
+		<action path="/aopExample" type="com.google.inject.struts1.example.aop.SomeAction"
+			name="someForm">
+			<forward name="success" path="/aopExample.jsp" />
 		</action>
 	</action-mappings>
 

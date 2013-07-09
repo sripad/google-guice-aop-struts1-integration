@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.google.inject.struts1.example;
+package com.google.inject.struts1.example.simpleinjection;
 
 import org.apache.struts.action.ActionForm;
 
